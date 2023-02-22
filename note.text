@@ -1,0 +1,268 @@
+Instalasi Project
+---------
+    1.  Buka CMD dan arahkan pada folder
+    2.  Ketik
+            composer create-project laravel/laravel:^8.0 nama-project       //install project
+            cd nama-project     //membuka direktori project
+            code .      //membuka teks editor VS Code
+    3.  Jalankan terminal (Ctrl + `)
+    5.  Buat database pada DBMS
+    4.  Buka file .env dan ubah baris berikut dengan nama database yang akan digunakan
+            DB_DATABASE=namaDatabase    //nama database harus sama dengan database yang dibuat
+    4.  Ketik
+            php artisan serve   //menjalankan server
+
+
+===============================================================================================================
+
+
+Konsep MVC
+---------
+-Model : File yang berguna untuk menghubungkan sistem dengan database
+-Controller : File yang berperan penting dalam sistem MVC sebagai jembatan antara model dan view
+-View : File yang digunakan untuk menampilkan interface dalan sistem
+
+
+===============================================================================================================
+
+
+Routes
+---------
+Folder routes terdapat file web.php yang bertugas untuk mengatur rute pada halaman website
+
+
+===============================================================================================================
+
+
+Controller
+---------
+Command :
+    php artisan make:controller namaController (membuat controller)
+    php artisan make:controller namaController -r (membuat controller resource yang didalamnya terdapat method
+                                                   index, create, add, show, edit, update, delete)
+
+
+===============================================================================================================
+
+
+Model
+---------
+Contoh Model :
+-----------------------------
+class Pengguna extends Model
+{
+    use HasFactory;
+    protected $table = "penggunas"; //nama tabel
+    protected $fillable = [
+        'nama',
+        'umur'
+    ]; //nama kolom yang dapat diisi, tidak termasuk id, created_at, updated_at
+}
+-----------------------------
+
+Command :
+    php artisan make:model namaModel (membuat model)
+
+
+===============================================================================================================
+
+
+View
+---------
+Dalam view, kita membuat file dengan format namaView.blade.php, kita dapat menggunakan sistem templating
+agar dapat menampilkan view secara lebih dinamis.
+
+    -Yield
+        Penggunaan yield biasanya untuk membuat content dinamis atau dapat berubah sesuai kebutuhan
+        Syntax :
+        @yield('namaContent') //disimpan pada file template
+
+        @extends('alamat/file/template')  //disimpan pada baris atas file content
+        @section('namaContent') //disimpan pada baris atas file content setelah extends
+            tag HTML/JS
+        @endsection //disimpan pada baris bawah file content setelah tag HTML/JS
+
+
+===============================================================================================================
+
+
+Migration
+---------
+Migration merupakan file yang beguna untuk membuat/mengenerate tabel kedalam database yang sudah dibuat
+
+Contoh Migration :
+-----------------------------
+public function up()
+    {
+        Schema::create('penggunas', function (Blueprint $table) {
+            $table->id(); //kolom ID yang merupakan primary key dan bersifat auto increment
+            $table->string('nama');
+            $table->integer('umur');
+            $table->timestamps(); //kode ini akan mengenerate 2 kolom yaitu created_at dan updated_at dengan tipe data dateTime
+        });
+    }
+-----------------------------
+
+Command :
+    php artisan make:migration create_namatabels_table (membuat migration)
+    php artisan migrate (menjalankan migration)
+    php artisan migrate:rollback (menghapus data migration sebelumnya)
+    php artisan migrate:rollback --step=2 (menghapus data migration pada 2 batch sebelumnya)
+
+
+===============================================================================================================
+
+
+Seeder
+---------
+Seeder merupakan file yang beguna untuk mengisi data kedalam tabel
+
+Contoh Seeder :
+-----------------------------
+public function run()
+    {
+        Pengguna::updateOrCreate([
+            'id'    => 1,
+            'nama'  => 'Gibran',
+            'umur'  => 20
+        ]);
+    }
+-----------------------------
+
+Command :
+    php artisan make:seeder namaSeeder (membuat seeder)
+    php artisan db:seed (menjalankan seeder)
+    php artisan db:seed --class=namaSeeder (menjalankan seeder berdasarkan kelas)
+
+
+
+===============================================================================================================
+
+
+Read
+---------
+File Controller :
+    public function index()
+        {
+            $tampung_data_ke_variabel = namaModel::all();
+
+            return view('alamat/file/view', [
+                'data' => $tampung_data_ke_variabel  //mengirim data ke view
+            ]);
+        }
+
+
+===============================================================================================================
+
+
+Create
+---------
+File View :
+    <form action="{{ route('namaController.store') }}" method="post">
+         @csrf
+         @method('POST')
+         <div class="form-group">
+            <label for="nama">Nama</label>
+            <input type="text" name="nama" class="form-control" id="nama" aria-describedby="nama" required>
+        </div>
+         <div class="form-group">
+            <label for="umur">Umur</label>
+            <input type="number" name="umur" class="form-control" id="umur" aria-describedby="umur" required>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+
+    *Note = -Pada tag form, bagian action="  " diisi dengan rute dari controller dan method yang akan digunakan
+            -Pada tag input wajib diberikan name="  " sebagai nama data yang akan dikirim ke controller
+            -Wajib menyertakan button dengan tipe submit (type="submit") sebagai trigger untuk mengirim data
+
+
+File Controller :
+    public function store(Request $request)
+        {
+            namaModel::create([
+                'nama'  =>  $request->nama,     //array associative 'key' => 'value'
+                'usia'  =>  $request->usia,
+            ]); //query untuk menambahkan data
+
+            return redirect()->back();  //kembali pada halaman sebelumnya
+        }
+
+        *Note = -Key yang terdapat pada array dalam query merupakan nama kolom pada tabel yang akan ditambahkan datanya
+                -Value yang terdapat pada array dalam query didapatkan dari name="  " pada form di file View
+                 yang dimasukkan kedalam object $request, jadi cara mengaksesnya dengan $request->nameDiForm
+
+
+===============================================================================================================
+
+
+Delete
+---------
+File View :
+    <form action="{{ route('namaController.destroy', $data->id) }}" method="post">
+         @csrf
+         @method('DELETE')
+            <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+
+    *Note = -Pada tag form, bagian action="  " diisi dengan rute dari controller dan method yang akan digunakan
+             dan mengirim data ID pada parameter kedua ke method destroy pada controller yang akan digunakan.
+
+
+File Controller :
+    public function destroy($id)
+        {
+            namaModel::delete($id); //query untuk menghapus data
+
+            return redirect()->back();  //kembali pada halaman sebelumnya
+        }
+
+
+===============================================================================================================
+
+
+Update
+---------
+File View :
+    <form action="{{ route('namaController.update', $data->id) }}" method="post">
+         @csrf
+         @method('PUT')
+         <input type="hidden" value="{{ $data->id }}"> //membuat inputan yang bersifat hidden(tersembunyi) dengan value yaitu
+         <div class="form-group">
+            <label for="nama">Nama</label>
+            <input type="text" name="nama" class="form-control" id="nama" aria-describedby="nama" required>
+        </div>
+         <div class="form-group">
+            <label for="umur">Umur</label>
+            <input type="number" name="umur" class="form-control" id="umur" aria-describedby="umur" required>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+
+    *Note = -Pada tag form, bagian action="  " diisi dengan rute dari controller dan method yang akan digunakan
+            -Pada tag input wajib diberikan name="  " sebagai nama data yang akan dikirim ke controller
+            -Wajib menyertakan button dengan tipe submit (type="submit") sebagai trigger untuk mengirim data
+
+
+File Controller :
+    public function update(Request $request, $id)
+        {
+            namaModel::where('id', $id)
+                        ->update([
+                            'nama'  =>  $request->nama,     //array associative 'key' => 'value'
+                            'usia'  =>  $request->usia,
+                        ]); //query untuk menambahkan data
+
+            return redirect()->back();  //kembali pada halaman sebelumnya
+        }
+
+        *Note = -Key yang terdapat pada array dalam query merupakan nama kolom pada tabel yang akan diubah datanya
+                -Value yang terdapat pada array dalam query didapatkan dari name="  " pada form di file View
+                 yang dimasukkan kedalam object $request, jadi cara mengaksesnya dengan $request->nameDiForm
+
+
+===========================================================================================================
