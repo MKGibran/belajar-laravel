@@ -18,9 +18,9 @@ Instalasi Project
 
 Konsep MVC
 ---------
--Model : File yang berguna untuk menghubungkan sistem dengan database
+-Model      : File yang berguna untuk menghubungkan sistem dengan database
 -Controller : File yang berperan penting dalam sistem MVC sebagai jembatan antara model dan view
--View : File yang digunakan untuk menampilkan interface dalan sistem
+-View       : File yang digunakan untuk menampilkan interface dalan sistem
 
 
 ===============================================================================================================
@@ -29,6 +29,18 @@ Konsep MVC
 Routes
 ---------
 Folder routes terdapat file web.php yang bertugas untuk mengatur rute pada halaman website
+
+Syntax :
+    //rute controller resource, sudah meliputi method index, create, store, show, edit, update, destroy
+    Route::resource('nama-rute', namaController::class);
+
+    //rute dengan method GET
+    Route::get('/nama-rute', [namaController::class, 'method'])->name('nama.rute');
+    Route::get('/nama-rute', 'namaController@method')->name('nama.rute');
+    Route::get('/nama-rute/{id}/', 'namaController@method')->name('nama.rute'); //mengirim id pada URL
+
+    //rute dengan method POST
+    Route::post('/nama-rute', [namaController::class, 'method'])->name('nama.rute');
 
 
 ===============================================================================================================
@@ -77,10 +89,15 @@ agar dapat menampilkan view secara lebih dinamis.
         Syntax :
         @yield('namaContent') //disimpan pada file template
 
-        @extends('alamat/file/template')  //disimpan pada baris atas file content
+        @extends('alamat.file.template')  //disimpan pada baris atas file content
         @section('namaContent') //disimpan pada baris atas file content setelah extends
             tag HTML/JS
         @endsection //disimpan pada baris bawah file content setelah tag HTML/JS
+
+    -Include
+        Penggunaan include biasanya untuk tampilan yang tidak sering diubah seperti sidebar, topbar, dll
+        Syntax :
+        @include('alamat.file.content')  //disimpan pada halaman template
 
 
 ===============================================================================================================
@@ -135,7 +152,6 @@ Command :
     php artisan db:seed --class=namaSeeder (menjalankan seeder berdasarkan kelas)
 
 
-
 ===============================================================================================================
 
 
@@ -146,7 +162,7 @@ File Controller :
         {
             $tampung_data_ke_variabel = namaModel::all();
 
-            return view('alamat/file/view', [
+            return view('alamat.file.view', [
                 'data' => $tampung_data_ke_variabel  //mengirim data ke view
             ]);
         }
